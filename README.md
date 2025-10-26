@@ -11,6 +11,8 @@ This project provides a customizable, multi-language contact form designed speci
 - **Multi-language Support**: English (US), German, and Chinese Simplified
 - **Instant Language Switching**: Real-time translation updates without page reload
 - **Persistent Language Preference**: User's language choice saved in localStorage
+- **Custom Validation**: Multilingual error messages with visual feedback
+- **Accessible**: ARIA alerts, keyboard navigation, and screen reader support
 - **Dynamics 365 Compatible**: All data attributes and form structure preserved
 - **Theme Customization**: Easy brand color configuration
 - **Newsletter Opt-in**: Integrated with Dynamics 365 Topic tracking
@@ -103,22 +105,29 @@ project-root/
 
 ### Key Components
 
-1. **Language Selector** (`contact-form.html:312-317`)
+1. **Language Selector** (`contact-form.html:341-346`)
    - Dropdown for manual language selection
    - Positioned at top-right of form
 
-2. **i18n Initialization** (`contact-form.html:83-302`)
+2. **i18n Initialization** (`contact-form.html:112-331`)
    - Translation resources
    - i18next configuration
    - Language switching functions
    - Content update logic
 
-3. **Form Fields** (`contact-form.html:329-347`)
+3. **Form Fields** (`contact-form.html:358-376`)
    - All Dynamics 365 data attributes preserved
    - Required attributes removed for custom validation
    - Labels dynamically updated on language change
 
-4. **Modal** (`contact-form.html:373-382`)
+4. **Form Validation** (`contact-form.html:430-575`)
+   - Custom validation logic
+   - Multilingual error messages
+   - Visual error feedback
+   - Email format validation
+   - Accessibility features
+
+5. **Modal** (`contact-form.html:404-413`)
    - Thank you message
    - Translatable content
    - Close button
@@ -192,14 +201,26 @@ The form maintains full compatibility with Dynamics 365 Marketing:
 
 ### Custom Validation
 
-The HTML `required` attributes have been removed to allow for custom validation logic. Implement your own validation using the `errors.*` translation keys:
+The form includes comprehensive custom validation with multilingual error messages:
 
-```javascript
-// Example custom validation
-if (!firstname.value) {
-  showError(i18next.t('errors.required'));
-}
-```
+**Validation Rules:**
+- All fields (First Name, Last Name, Email, Description) are required
+- Email must be in valid format (e.g., user@example.com)
+- Empty/whitespace-only values are rejected
+
+**Features:**
+- Error messages display in the currently selected language
+- Visual feedback with red borders on invalid fields
+- Errors clear automatically when user starts typing
+- Form scrolls to first error on validation failure
+- Accessible error messages with ARIA alerts
+
+**Available Error Translation Keys:**
+- `errors.required` - "This field is required"
+- `errors.email` - "Please enter a valid email address"
+- `errors.minLength` - "This field must be at least {{min}} characters"
+
+The validation logic is implemented in `contact-form.html` (lines 430-575) and uses the i18next translation system for all error messages.
 
 ## Browser Support
 
@@ -248,11 +269,25 @@ The form uses `localStorage` to persist language preference:
 2. Check translation keys exist in all language resources
 3. Ensure `updatePageContent()` function is called after language change
 
+### Form validation not working
+
+1. Check that i18next is initialized before validation (should load first)
+2. Verify error translation keys exist in all language resources
+3. Check browser console for JavaScript errors
+4. Ensure field IDs match those in validateForm() function
+
+### Error messages in wrong language
+
+1. Switch language and try submitting again
+2. Check that i18next.t() is being called correctly in validation functions
+3. Verify all error translation keys exist in the selected language
+
 ### Form not submitting to Dynamics 365
 
 1. Verify all `data-editorblocktype` attributes are intact
 2. Check `data-targetaudience` and `data-targetproperty` match your D365 setup
 3. Ensure form is deployed in Dynamics 365 Marketing context
+4. Note: Current implementation shows success modal instead of actual submission (modify line 546 for production)
 
 ## Contributing
 
