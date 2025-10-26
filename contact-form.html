@@ -415,7 +415,7 @@ Notes:
 
   <!--
   ============================================================
-  MODAL CONTROL SCRIPT
+  FORM VALIDATION & MODAL CONTROL SCRIPTS
   ============================================================
   -->
   <script>
@@ -426,6 +426,152 @@ Notes:
     function closeThankYouModal() {
       document.getElementById('thankYouModal').classList.add('hidden');
     }
+
+    /**
+     * Display error message below a form field
+     * @param {HTMLElement} field - The input/textarea element
+     * @param {string} message - The error message to display
+     */
+    function showFieldError(field, message) {
+      // Remove any existing error
+      clearFieldError(field);
+
+      // Add error styling to field
+      field.classList.add('border-red-500', 'focus:ring-red-500');
+      field.classList.remove('border-gray-300', 'focus:ring-brand');
+
+      // Create error message element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'text-red-500 text-sm mt-1 field-error';
+      errorDiv.textContent = message;
+      errorDiv.setAttribute('role', 'alert');
+
+      // Insert error message after the field
+      field.parentNode.appendChild(errorDiv);
+    }
+
+    /**
+     * Clear error message and styling from a form field
+     * @param {HTMLElement} field - The input/textarea element
+     */
+    function clearFieldError(field) {
+      // Remove error styling
+      field.classList.remove('border-red-500', 'focus:ring-red-500');
+      field.classList.add('border-gray-300', 'focus:ring-brand');
+
+      // Remove error message
+      const errorDiv = field.parentNode.querySelector('.field-error');
+      if (errorDiv) {
+        errorDiv.remove();
+      }
+    }
+
+    /**
+     * Validate email format
+     * @param {string} email - Email address to validate
+     * @returns {boolean} True if valid email format
+     */
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    /**
+     * Validate the entire form
+     * @returns {boolean} True if form is valid
+     */
+    function validateForm() {
+      let isValid = true;
+
+      // Get all required fields
+      const firstname = document.getElementById('firstname');
+      const lastname = document.getElementById('lastname');
+      const email = document.getElementById('emailaddress1');
+      const description = document.getElementById('description');
+
+      // Validate First Name
+      if (!firstname.value.trim()) {
+        showFieldError(firstname, i18next.t('errors.required'));
+        isValid = false;
+      }
+
+      // Validate Last Name
+      if (!lastname.value.trim()) {
+        showFieldError(lastname, i18next.t('errors.required'));
+        isValid = false;
+      }
+
+      // Validate Email
+      if (!email.value.trim()) {
+        showFieldError(email, i18next.t('errors.required'));
+        isValid = false;
+      } else if (!isValidEmail(email.value.trim())) {
+        showFieldError(email, i18next.t('errors.email'));
+        isValid = false;
+      }
+
+      // Validate Description
+      if (!description.value.trim()) {
+        showFieldError(description, i18next.t('errors.required'));
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    /**
+     * Initialize form validation
+     * Sets up event listeners for form submission and field input
+     */
+    function initializeFormValidation() {
+      const form = document.querySelector('.marketingForm');
+      const fields = [
+        document.getElementById('firstname'),
+        document.getElementById('lastname'),
+        document.getElementById('emailaddress1'),
+        document.getElementById('description')
+      ];
+
+      // Handle form submission
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Clear all existing errors
+        fields.forEach(field => clearFieldError(field));
+
+        // Validate form
+        if (validateForm()) {
+          // Form is valid - show success modal
+          // Note: In production, this would submit to Dynamics 365
+          document.getElementById('thankYouModal').classList.remove('hidden');
+          document.getElementById('thankYouModal').classList.add('flex');
+
+          // Reset form
+          form.reset();
+        } else {
+          // Scroll to first error
+          const firstError = document.querySelector('.border-red-500');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.focus();
+          }
+        }
+      });
+
+      // Clear errors when user starts typing
+      fields.forEach(field => {
+        field.addEventListener('input', function() {
+          clearFieldError(this);
+        });
+      });
+    }
+
+    // Initialize validation when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for i18next to be initialized before setting up validation
+      // This ensures error messages can be translated
+      setTimeout(initializeFormValidation, 100);
+    });
   </script>
 </body>
 </html>
