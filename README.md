@@ -1,4 +1,4 @@
-# Dynamics 365 Customer Insights Form Translator
+# Dynamics 365 Customer Insights - Form Translator
 
 Multi-language contact form for Dynamics 365 Marketing with built-in internationalization (i18n) support.
 
